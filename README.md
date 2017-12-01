@@ -25,27 +25,31 @@ package main
 
 import (
 	"fmt"
-	"github.com/julusian/go-twitch-helix/twitch"
-	"github.com/julusian/go-twitch-helix/twitchapi"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/julusian/go-twitch-helix/helix"
+	"github.com/julusian/go-twitch-helix/twitch"
 )
 
 func main() {
-	// client := twitchapi.NewClient(&http.Client{}, os.Getenv("CLIENT_ID"))
-	// opt := &twitch.ListOptions{
-	// 	Limit:  10,
-	// 	Offset: 0,
-	// }
+	client := twitch.NewApiClient(&http.Client{}, os.Getenv("CLIENT_ID"))
 
-	// games, err := client.Games.Top(opt)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	opts := &helix.StreamsParams{
+		Limit: 10,
+	}
 
-	// for i, s := range games.Top {
-	// 	fmt.Printf("%d - %s (%d)\n", i+1, s.Game.Name, s.Viewers)
-	// }
+	res, rate, err := helix.GetStreams(client, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Rate limiter %d/%d remaining", rate.Remaining, rate.Limit)
+
+	for i, s := range res.Data {
+		fmt.Printf("%d - %s (%d)\n", i+1, s.Title, s.ID)
+	}
 }
 ```
 

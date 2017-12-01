@@ -10,7 +10,7 @@ import (
 const followersTestChannel = 79110861 // Julusian
 const followersTestUser = 92016198    // Botofdork
 
-func checkAllDataIsWellDefined(t *testing.T, data []FollowsEntry) {
+func checkAllFollowsDataIsWellDefined(t *testing.T, data []FollowsEntry) {
 	for _, v := range data {
 		require.NotEqual(t, 0, v.ChannelID)
 		require.NotEqual(t, 0, v.UserID)
@@ -31,7 +31,7 @@ func TestFollowsForChannel(t *testing.T) {
 	require.NotNil(t, res)
 
 	require.NotEqual(t, 0, len(res.Data))
-	checkAllDataIsWellDefined(t, res.Data)
+	checkAllFollowsDataIsWellDefined(t, res.Data)
 }
 
 func TestFollowsForChannelPagination(t *testing.T) {
@@ -48,7 +48,7 @@ func TestFollowsForChannelPagination(t *testing.T) {
 	require.NotNil(t, res)
 
 	require.NotEqual(t, 0, len(res.Data))
-	checkAllDataIsWellDefined(t, res.Data)
+	checkAllFollowsDataIsWellDefined(t, res.Data)
 	firstID := res.Data[0].UserID
 
 	// Get page 2
@@ -60,7 +60,7 @@ func TestFollowsForChannelPagination(t *testing.T) {
 	require.NotNil(t, res)
 
 	require.NotEqual(t, 0, len(res.Data))
-	checkAllDataIsWellDefined(t, res.Data)
+	checkAllFollowsDataIsWellDefined(t, res.Data)
 	secondID := res.Data[0].UserID
 
 	require.NotEqual(t, firstID, secondID)
@@ -76,7 +76,7 @@ func TestFollowsForChannelPagination(t *testing.T) {
 	// require.NotNil(t, res)
 
 	// require.NotEqual(t, 0, len(res.Data))
-	// checkAllDataIsWellDefined(t, res.Data)
+	// checkAllFollowsDataIsWellDefined(t, res.Data)
 	// thirdID := res.Data[0].UserID
 
 	// require.NotEqual(t, thirdID, secondID)
@@ -96,7 +96,7 @@ func TestFollowsForUser(t *testing.T) {
 	require.NotNil(t, res)
 
 	require.NotEqual(t, 0, len(res.Data))
-	checkAllDataIsWellDefined(t, res.Data)
+	checkAllFollowsDataIsWellDefined(t, res.Data)
 }
 
 func TestFollowsForUserAndChannel(t *testing.T) {
@@ -113,7 +113,7 @@ func TestFollowsForUserAndChannel(t *testing.T) {
 	require.NotNil(t, res)
 
 	require.NotEqual(t, 0, len(res.Data))
-	checkAllDataIsWellDefined(t, res.Data)
+	checkAllFollowsDataIsWellDefined(t, res.Data)
 }
 
 func TestFollowsForUserAndChannelNoFollow(t *testing.T) {
