@@ -9,5 +9,7 @@ import (
 )
 
 func newTestClient(t *testing.T) *twitch.ApiClient {
-	return twitch.NewApiClient(&http.Client{}, os.Getenv("TWITCH_CLIENTID"))
+	cl := twitch.NewApiClient(&http.Client{}, os.Getenv("TWITCH_CLIENTID"))
+	cl.RateLimitRetries = 2
+	return cl
 }

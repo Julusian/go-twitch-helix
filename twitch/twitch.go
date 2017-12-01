@@ -20,6 +20,8 @@ type RateLimit struct {
 type ApiClient struct {
 	client   *http.Client
 	clientID string
+
+	RateLimitRetries int
 }
 
 type errorBody struct {
@@ -69,10 +71,16 @@ func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, error) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", spec.GetBearerToken()))
 	}
 
+	return t.runRequest(req, t.RateLimitRetries)
+}
+
+func (t *ApiClient) runRequest(req *http.Request, retries int) ([]byte, *RateLimit, error) {
 	resp, err := t.client.Do(req)
 	if err != nil {
 		return nil, nil, err
 	}
+
+	rateLimit := parseRateLimitHeaders(resp.Header)
 
 	defer resp.Body.Close()
 
@@ -82,20 +90,25 @@ func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, error) {
 	case http.StatusNotModified:
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, nil, err
+			return nil, rateLimit, err
 		}
 
-		rateLimit := parseRateLimitHeaders(resp.Header)
 		return body, rateLimit, nil
 	case http.StatusTooManyRequests:
-		return nil, nil, fmt.Errorf("Hit rate limit") // TODO - better
+		if retries <= 0 {
+			return nil, rateLimit, fmt.Errorf("Exceeded rate limiter retries") // TODO - better
+		}
+
+		time.Sleep(rateLimit.Reset.Sub(time.Now()))
+
+		return t.runRequest(req, retries-1)
 	case http.StatusServiceUnavailable:
 		// TODO - wait and retry before failing?
-		return nil, nil, fmt.Errorf("Service unavailable") // TODO - better
+		return nil, rateLimit, fmt.Errorf("Service unavailable") // TODO - better
 	case http.StatusBadRequest:
 		fallthrough
 	default:
-		return nil, nil, tryParseResponse(resp.StatusCode, resp.Body)
+		return nil, rateLimit, tryParseResponse(resp.StatusCode, resp.Body)
 	}
 }
 
@@ -117,17 +130,17 @@ func tryParseResponse(statusCode int, body io.ReadCloser) error {
 func parseRateLimitHeaders(headers http.Header) *RateLimit {
 	rateLimit := &RateLimit{}
 
-	limit, err := strconv.Atoi(headers.Get("RateLimit-Limit"))
+	limit, err := strconv.Atoi(headers.Get("Ratelimit-Limit"))
 	if err == nil {
 		rateLimit.Limit = limit
 	}
 
-	remain, err := strconv.Atoi(headers.Get("RateLimit-Remaining"))
+	remain, err := strconv.Atoi(headers.Get("Ratelimit-Remaining"))
 	if err == nil {
 		rateLimit.Remaining = remain
 	}
 
-	reset, err := strconv.Atoi(headers.Get("RateLimit-Remaining"))
+	reset, err := strconv.Atoi(headers.Get("Ratelimit-Reset"))
 	if err == nil {
 		rateLimit.Reset = time.Unix(int64(reset), 0)
 	}
