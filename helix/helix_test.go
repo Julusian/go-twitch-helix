@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/julusian/go-twitch-helix/twitch"
+	"github.com/Julusian/go-twitch-helix/twitch"
 )
 
 func newTestClient(t *testing.T) *twitch.ApiClient {

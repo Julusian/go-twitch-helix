@@ -1,6 +1,6 @@
 package helix
 
-import "github.com/julusian/go-twitch-helix/twitch"
+import "github.com/Julusian/go-twitch-helix/twitch"
 
 const HelixURL = "https://api.twitch.tv/helix/"
 

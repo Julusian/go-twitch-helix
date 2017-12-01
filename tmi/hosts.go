@@ -3,7 +3,7 @@ package tmi
 import (
 	"encoding/json"
 
-	"github.com/julusian/go-twitch-helix/twitch"
+	"github.com/Julusian/go-twitch-helix/twitch"
 )
 
 // HostsList is a structure representing a list of channels who are hosting others

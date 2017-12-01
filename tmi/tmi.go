@@ -1,6 +1,6 @@
 package tmi
 
-import "github.com/julusian/go-twitch-helix/twitch"
+import "github.com/Julusian/go-twitch-helix/twitch"
 
 const TmiURL = "https://tmi.twitch.tv/"
 

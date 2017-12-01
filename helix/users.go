@@ -3,7 +3,7 @@ package helix
 import (
 	"encoding/json"
 
-	"github.com/julusian/go-twitch-helix/twitch"
+	"github.com/Julusian/go-twitch-helix/twitch"
 )
 
 type UserType string

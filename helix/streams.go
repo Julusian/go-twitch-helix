@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/julusian/go-twitch-helix/twitch"
+	"github.com/Julusian/go-twitch-helix/twitch"
 )
 
 type StreamsResponse struct {

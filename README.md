@@ -13,10 +13,10 @@ Additional api calls are available for some Twitch v5 Api, to fill in the gaps u
 To install `go-twitch-helix` run the command:
 
 ```bash
-$ go get github.com/julusian/go-twitch-helix
+$ go get github.com/Julusian/go-twitch-helix
 ```
 
-Full docs at [GoDocs](https://godoc.org/github.com/julusian/go-twitch-helix)
+Full docs at [GoDocs](https://godoc.org/github.com/Julusian/go-twitch-helix)
 
 Here's an example program that gets the top 10 twitch games:
 
@@ -29,8 +29,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/julusian/go-twitch-helix/helix"
-	"github.com/julusian/go-twitch-helix/twitch"
+	"github.com/Julusian/go-twitch-helix/helix"
+	"github.com/Julusian/go-twitch-helix/twitch"
 )
 
 func main() {
