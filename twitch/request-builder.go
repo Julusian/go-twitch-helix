@@ -4,12 +4,13 @@ import "strconv"
 
 var _ IRequestBuilder = (*requestBuilder)(nil)
 
-func NewRequestBuilder(baseURL string, path string) IRequestBuilder {
+func NewRequestBuilder(baseURL string, authType AuthType, path string) IRequestBuilder {
 	return &requestBuilder{
 		req: &request{
 			BaseURL:     baseURL,
 			Path:        path,
 			QueryParams: map[string][]string{},
+			AuthType:    authType,
 		},
 	}
 }
@@ -17,8 +18,7 @@ func NewRequestBuilder(baseURL string, path string) IRequestBuilder {
 type IRequestBuilder interface {
 	Get() IRequest
 
-	WithOAuthToken(string) IRequestBuilder
-	WithBearerToken(string) IRequestBuilder
+	WithAuthToken(string) IRequestBuilder
 	WithAcceptHeader(string) IRequestBuilder
 
 	WithParamString(name string, value string) IRequestBuilder
@@ -35,13 +35,8 @@ func (b *requestBuilder) Get() IRequest {
 	return b.req
 }
 
-func (b *requestBuilder) WithOAuthToken(token string) IRequestBuilder {
-	b.req.OAuthToken = token
-	return b
-}
-
-func (b *requestBuilder) WithBearerToken(token string) IRequestBuilder {
-	b.req.BearerToken = token
+func (b *requestBuilder) WithAuthToken(token string) IRequestBuilder {
+	b.req.AuthToken = token
 	return b
 }
 

@@ -1,5 +1,7 @@
 package twitch
 
+import "encoding/json"
+
 var _ IRequest = (*request)(nil)
 
 type IRequest interface {
@@ -7,31 +9,38 @@ type IRequest interface {
 	GetPath() string
 	GetQueryParams() map[string][]string
 
-	GetOAuthToken() string
-	GetBearerToken() string
+	GetAuthToken() string
+	GetAuthType() AuthType
 	GetAcceptHeader() string
 }
+
+type AuthType int
+
+const (
+	AuthTypeOAuth  AuthType = 0
+	AuthTypeBearer AuthType = 1
+)
 
 type request struct {
 	BaseURL     string
 	Path        string
 	QueryParams map[string][]string
 
-	OAuthToken   string
-	BearerToken  string
-	AcceptHeader string
+	AuthType     AuthType
+	AuthToken    string `json:",omitempty"`
+	AcceptHeader string `json:",omitempty"`
 }
 
 func (r *request) GetBaseURL() string {
 	return r.BaseURL
 }
 
-func (r *request) GetOAuthToken() string {
-	return r.OAuthToken
+func (r *request) GetAuthToken() string {
+	return r.AuthToken
 }
 
-func (r *request) GetBearerToken() string {
-	return r.BearerToken
+func (r *request) GetAuthType() AuthType {
+	return r.AuthType
 }
 
 func (r *request) GetAcceptHeader() string {
@@ -44,4 +53,14 @@ func (r *request) GetPath() string {
 
 func (r *request) GetQueryParams() map[string][]string {
 	return r.QueryParams
+}
+
+func UnmarshalRequest(data []byte) (IRequest, error) {
+	res := request{}
+	err := json.Unmarshal(data, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }

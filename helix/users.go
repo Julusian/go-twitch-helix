@@ -46,7 +46,7 @@ type UsersParams struct {
 
 func BuildGetUsers(params *UsersParams) twitch.IRequest {
 	return newHelixRequest("users").
-		WithBearerToken(params.AuthToken).
+		WithAuthToken(params.AuthToken).
 		WithParamIntArray("id", params.IDs).
 		WithParamStringArray("login", params.Logins).
 		Get()

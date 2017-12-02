@@ -22,6 +22,7 @@ type ApiClient struct {
 	clientID string
 
 	RateLimitRetries int
+	DefaultAuthToken string
 }
 
 type errorBody struct {
@@ -49,6 +50,9 @@ func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, error) {
 		return nil, nil, err // TODO - wrap better
 	}
 
+	// Ensure the request doesnt hit a cache
+	spec.GetQueryParams()["_"] = []string{strconv.Itoa(int(time.Now().Unix()))}
+
 	rel.RawQuery = url.Values(spec.GetQueryParams()).Encode()
 	u := baseURL.ResolveReference(rel)
 
@@ -64,11 +68,17 @@ func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, error) {
 	req.Header.Add("Client-ID", t.clientID)
 
 	// Add oauth token if supplied
-	if spec.GetOAuthToken() != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("OAuth %s", spec.GetOAuthToken()))
+	token := spec.GetAuthToken()
+	if token == "" {
+		token = t.DefaultAuthToken
 	}
-	if spec.GetBearerToken() != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", spec.GetBearerToken()))
+	if token != "" {
+		switch spec.GetAuthType() {
+		case AuthTypeOAuth:
+			req.Header.Add("Authorization", fmt.Sprintf("OAuth %s", token))
+		case AuthTypeBearer:
+			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		}
 	}
 
 	return t.runRequest(req, t.RateLimitRetries)
