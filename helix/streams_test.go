@@ -13,7 +13,6 @@ func checkAllStreamDataIsWellDefined(t *testing.T, data []StreamsEntry) {
 		require.NotEqual(t, "", v.Language)
 		require.NotEqual(t, time.Unix(0, 0), v.StartedAt)
 		require.NotEqual(t, "", v.ThumbnailURL)
-		require.NotEqual(t, "", v.Title) // TODO - this may need moving to a seperate loop as it can sometimes be legitimately empty
 		require.NotEqual(t, "", v.Type)
 		require.NotEqual(t, 0, v.UserID)
 	}
@@ -35,6 +34,15 @@ func checkStreamsHasValidCommunityID(t *testing.T, data []StreamsEntry) {
 func checkStreamsHasValidGameID(t *testing.T, data []StreamsEntry) {
 	for _, v := range data {
 		if v.GameID != "" {
+			return
+		}
+	}
+
+	require.Fail(t, "No community_ids were defined in any stream")
+}
+func checkStreamsHasValidTitle(t *testing.T, data []StreamsEntry) {
+	for _, v := range data {
+		if v.Title != "" {
 			return
 		}
 	}
@@ -70,6 +78,7 @@ func TestStreamsAll(t *testing.T) {
 	checkStreamsHasValidCommunityID(t, res.Data)
 	checkStreamsHasValidGameID(t, res.Data)
 	checkStreamsHasValidViewerCount(t, res.Data)
+	checkStreamsHasValidTitle(t, res.Data)
 }
 
 func TestStreamsByUser(t *testing.T) {
