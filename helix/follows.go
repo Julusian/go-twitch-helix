@@ -42,8 +42,8 @@ func GetFollows(client *twitch.ApiClient, params *FollowsParams) (*FollowsRespon
 		return nil, nil, err
 	}
 
-	r, err := UnmarshalFollows(res)
-	return r, rate, err
+	r, err2 := UnmarshalFollows(res)
+	return r, rate, err2
 }
 
 func UnmarshalFollows(res []byte) (*FollowsResponse, error) {

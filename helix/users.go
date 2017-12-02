@@ -58,8 +58,8 @@ func GetUsers(client *twitch.ApiClient, params *UsersParams) (*UsersResponse, *t
 		return nil, nil, err
 	}
 
-	r, err := UnmarshalUsers(res)
-	return r, rate, err
+	r, err2 := UnmarshalUsers(res)
+	return r, rate, err2
 }
 
 func UnmarshalUsers(res []byte) (*UsersResponse, error) {

@@ -57,8 +57,8 @@ func GetStreams(client *twitch.ApiClient, params *StreamsParams) (*StreamsRespon
 		return nil, nil, err
 	}
 
-	r, err := UnmarshalStreams(res)
-	return r, rate, err
+	r, err2 := UnmarshalStreams(res)
+	return r, rate, err2
 }
 
 func UnmarshalStreams(res []byte) (*StreamsResponse, error) {

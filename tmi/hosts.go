@@ -37,8 +37,8 @@ func GetHosts(client *twitch.ApiClient, channel int) (*HostsList, *twitch.RateLi
 		return nil, nil, err
 	}
 
-	r, err := UnmarshalHosts(res)
-	return r, rate, err
+	r, err2 := UnmarshalHosts(res)
+	return r, rate, err2
 }
 
 func UnmarshalHosts(res []byte) (*HostsList, error) {

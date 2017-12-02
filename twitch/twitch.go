@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -31,6 +32,30 @@ type errorBody struct {
 	Message string `json:"message"`
 }
 
+const (
+	ErrorCodeUnknown        = 900
+	ErrorCodeInvalidRequest = 901
+	ErrorCodeApiFailure     = 910
+)
+
+type TwitchApiError struct {
+	Code       int
+	Message    string
+	InnerError error
+}
+
+func newError(code int, message string, err error) *TwitchApiError {
+	return &TwitchApiError{
+		Code:       code,
+		Message:    message,
+		InnerError: err,
+	}
+}
+
+func (e *TwitchApiError) Error() string {
+	return fmt.Sprintf("%s (%d): %v", e.Message, e.Code, e.InnerError)
+}
+
 func NewApiClient(client *http.Client, clientID string) *ApiClient {
 	return &ApiClient{
 		client:   client,
@@ -38,16 +63,16 @@ func NewApiClient(client *http.Client, clientID string) *ApiClient {
 	}
 }
 
-func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, error) {
+func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, *TwitchApiError) {
 	baseURL, err := url.Parse(spec.GetBaseURL())
 	if err != nil {
-		return nil, nil, err // TODO - wrap better
+		return nil, nil, newError(ErrorCodeInvalidRequest, "Failed to parse request base URL", err)
 	}
 
 	// Try and parse url
 	rel, err := url.Parse(spec.GetPath())
 	if err != nil {
-		return nil, nil, err // TODO - wrap better
+		return nil, nil, newError(ErrorCodeInvalidRequest, "Failed to parse request path", err)
 	}
 
 	// Ensure the request doesnt hit a cache
@@ -59,7 +84,7 @@ func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, error) {
 	// Create request
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, newError(ErrorCodeInvalidRequest, "Failed to build http request from url", err)
 	}
 
 	if spec.GetAcceptHeader() != "" {
@@ -84,15 +109,14 @@ func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, error) {
 	return t.runRequest(req, t.RateLimitRetries)
 }
 
-func (t *ApiClient) runRequest(req *http.Request, retries int) ([]byte, *RateLimit, error) {
+func (t *ApiClient) runRequest(req *http.Request, retries int) ([]byte, *RateLimit, *TwitchApiError) {
 	resp, err := t.client.Do(req)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, newError(ErrorCodeUnknown, "Unknown http error", err)
 	}
 
-	rateLimit := parseRateLimitHeaders(resp.Header)
-
 	defer resp.Body.Close()
+	rateLimit := parseRateLimitHeaders(resp.Header)
 
 	switch resp.StatusCode {
 	case http.StatusOK:
@@ -100,21 +124,24 @@ func (t *ApiClient) runRequest(req *http.Request, retries int) ([]byte, *RateLim
 	case http.StatusNotModified:
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, rateLimit, err
+			return nil, rateLimit, newError(ErrorCodeApiFailure, "Failed to read response body", err)
 		}
 
 		return body, rateLimit, nil
 	case http.StatusTooManyRequests:
 		if retries <= 0 {
-			return nil, rateLimit, fmt.Errorf("Exceeded rate limiter retries") // TODO - better
+			return nil, rateLimit, newError(http.StatusTooManyRequests, "Rate limited. No more retries", nil)
 		}
 
-		time.Sleep(rateLimit.Reset.Sub(time.Now()))
+		// Wait until rate limit resets
+		time.Sleep(15 * time.Second)                                  // Wait for some period. Note: the counter will change before the reset time
+		time.Sleep(time.Duration(rand.Intn(3000)) * time.Millisecond) // add some jitter
 
 		return t.runRequest(req, retries-1)
 	case http.StatusServiceUnavailable:
+
 		// TODO - wait and retry before failing?
-		return nil, rateLimit, fmt.Errorf("Service unavailable") // TODO - better
+		return nil, rateLimit, newError(ErrorCodeApiFailure, "Service unavailable", nil)
 	case http.StatusBadRequest:
 		fallthrough
 	default:
@@ -122,19 +149,19 @@ func (t *ApiClient) runRequest(req *http.Request, retries int) ([]byte, *RateLim
 	}
 }
 
-func tryParseResponse(statusCode int, body io.ReadCloser) error {
+func tryParseResponse(statusCode int, body io.ReadCloser) *TwitchApiError {
 	data, err := ioutil.ReadAll(body)
 	if err != nil {
-		return fmt.Errorf("Api error, response code: %d", statusCode)
+		return newError(ErrorCodeApiFailure, "Failed to read response", err)
 	}
 
 	res := &errorBody{}
 	err = json.Unmarshal(data, res)
 	if err != nil {
-		return fmt.Errorf("Api error, response code: %d", statusCode)
+		return newError(ErrorCodeApiFailure, "Failed to decode response", err)
 	}
 
-	return fmt.Errorf("Twitch error: %s: %s", res.Error, res.Message)
+	return newError(res.Status, fmt.Sprintf("%s: %s", res.Error, res.Message), nil)
 }
 
 func parseRateLimitHeaders(headers http.Header) *RateLimit {
