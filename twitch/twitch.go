@@ -90,19 +90,22 @@ func (t *ApiClient) MakeRequest(spec IRequest) ([]byte, *RateLimit, *TwitchApiEr
 	if spec.GetAcceptHeader() != "" {
 		req.Header.Add("Accept", spec.GetAcceptHeader())
 	}
-	req.Header.Add("Client-ID", t.clientID)
 
-	// Add oauth token if supplied
-	token := spec.GetAuthToken()
-	if token == "" {
-		token = t.DefaultAuthToken
-	}
-	if token != "" {
-		switch spec.GetAuthType() {
-		case AuthTypeOAuth:
-			req.Header.Add("Authorization", fmt.Sprintf("OAuth %s", token))
-		case AuthTypeBearer:
-			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	if !spec.GetRemoveClientID() {
+		req.Header.Add("Client-ID", t.clientID)
+
+		// Add oauth token if supplied
+		token := spec.GetAuthToken()
+		if token == "" {
+			token = t.DefaultAuthToken
+		}
+		if token != "" {
+			switch spec.GetAuthType() {
+			case AuthTypeOAuth:
+				req.Header.Add("Authorization", fmt.Sprintf("OAuth %s", token))
+			case AuthTypeBearer:
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+			}
 		}
 	}
 

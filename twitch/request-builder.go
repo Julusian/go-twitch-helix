@@ -20,6 +20,7 @@ type IRequestBuilder interface {
 
 	WithAuthToken(string) IRequestBuilder
 	WithAcceptHeader(string) IRequestBuilder
+	WithoutClientID() IRequestBuilder
 
 	WithParamString(name string, value string) IRequestBuilder
 	WithParamStringArray(name string, value []string) IRequestBuilder
@@ -42,6 +43,11 @@ func (b *requestBuilder) WithAuthToken(token string) IRequestBuilder {
 
 func (b *requestBuilder) WithAcceptHeader(token string) IRequestBuilder {
 	b.req.AcceptHeader = token
+	return b
+}
+
+func (b *requestBuilder) WithoutClientID() IRequestBuilder {
+	b.req.RemoveClientID = true
 	return b
 }
 

@@ -9,6 +9,7 @@ type IRequest interface {
 	GetPath() string
 	GetQueryParams() map[string][]string
 
+	GetRemoveClientID() bool
 	GetAuthToken() string
 	GetAuthType() AuthType
 	GetAcceptHeader() string
@@ -26,13 +27,18 @@ type request struct {
 	Path        string
 	QueryParams map[string][]string
 
-	AuthType     AuthType
-	AuthToken    string `json:",omitempty"`
-	AcceptHeader string `json:",omitempty"`
+	RemoveClientID bool
+	AuthType       AuthType
+	AuthToken      string `json:",omitempty"`
+	AcceptHeader   string `json:",omitempty"`
 }
 
 func (r *request) GetBaseURL() string {
 	return r.BaseURL
+}
+
+func (r *request) GetRemoveClientID() bool {
+	return r.RemoveClientID
 }
 
 func (r *request) GetAuthToken() string {

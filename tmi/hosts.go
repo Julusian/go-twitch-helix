@@ -9,7 +9,7 @@ import (
 // HostsList is a structure representing a list of channels who are hosting others
 // https://tmi.twitch.tv/hosts?include_logins=1&target=###
 type HostsList struct {
-	Hosts []HostsEntry `json:"hosts,omitempty"`
+	Hosts []HostsEntry `json:"hosts"`
 }
 
 // HostsEntry is an element of HostsList
