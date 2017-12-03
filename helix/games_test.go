@@ -29,6 +29,7 @@ func TestGamesById(t *testing.T) {
 	for _, v := range res.Data {
 		ids = append(ids, v.ID)
 	}
+	sort.Strings(ids)
 	require.Equal(t, []string{"1234", "345"}, ids)
 }
 
