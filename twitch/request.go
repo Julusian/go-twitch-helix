@@ -27,7 +27,7 @@ type request struct {
 	Path        string
 	QueryParams map[string][]string
 
-	RemoveClientID bool
+	RemoveClientID bool `json:",omitempty"`
 	AuthType       AuthType
 	AuthToken      string `json:",omitempty"`
 	AcceptHeader   string `json:",omitempty"`
