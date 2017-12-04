@@ -14,19 +14,16 @@ func checkAllVideosDataIsWellDefined(t *testing.T, data []VideosEntry) {
 		require.NotEqual(t, "", v.ID)
 		require.NotEqual(t, 0, v.UserID)
 		require.NotEqual(t, "", v.Title)
-		// require.NotEqual(t, "", v.Description)
 		require.NotEqual(t, time.Unix(0, 0), v.CreatedAt)
 		require.NotEqual(t, time.Unix(0, 0), v.PublishedAt)
-		require.NotEqual(t, "", v.ThumbnailURL)
-		// require.NotEqual(t, "", v.Language)
 		require.NotEqual(t, "", v.Duration)
-		// ViewCount
 	}
 }
 func checkAllVideosDataAdditional(t *testing.T, data []VideosEntry) {
 	descCount := 0
 	langCount := 0
 	viewCount := 0
+	thumbCount := 0
 
 	for _, v := range data {
 		if v.Description != "" {
@@ -38,11 +35,15 @@ func checkAllVideosDataAdditional(t *testing.T, data []VideosEntry) {
 		if v.ViewCount != 0 {
 			viewCount++
 		}
+		if v.ThumbnailURL != "" {
+			thumbCount++
+		}
 	}
 
 	// require.NotEqual(t, 0, descCount)
 	require.NotEqual(t, 0, langCount)
 	// require.NotEqual(t, 0, viewCount)
+	require.NotEqual(t, 0, thumbCount)
 }
 
 func TestGetVideosByGameId(t *testing.T) {
