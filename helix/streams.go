@@ -32,7 +32,7 @@ type StreamsParams struct {
 	Limit       int
 	GameID      []string
 	Language    []string
-	Type        string // all, live, vodcast
+	Type        string // all, live
 	UserID      []int
 	UserLogin   []string
 }

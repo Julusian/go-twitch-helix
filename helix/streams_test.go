@@ -181,21 +181,21 @@ func TestStreamsByType(t *testing.T) {
 		Type:  "vodcast",
 	}
 
-	// Vodcast
-	res, _, err := GetStreams(tc, params)
-	require.Nil(t, err)
-	require.NotNil(t, res)
+	// // Vodcast
+	// res, _, err := GetStreams(tc, params)
+	// require.Nil(t, err)
+	// require.NotNil(t, res)
 
-	require.NotEqual(t, 0, len(res.Data))
-	checkAllStreamDataIsWellDefined(t, res.Data)
+	// require.NotEqual(t, 0, len(res.Data))
+	// checkAllStreamDataIsWellDefined(t, res.Data)
 
-	for _, v := range res.Data {
-		require.Equal(t, params.Type, v.Type)
-	}
+	// for _, v := range res.Data {
+	// 	require.Equal(t, params.Type, v.Type)
+	// }
 
 	// Live
 	params.Type = "live"
-	res, _, err = GetStreams(tc, params)
+	res, _, err := GetStreams(tc, params)
 	require.Nil(t, err)
 	require.NotNil(t, res)
 
