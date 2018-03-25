@@ -10,14 +10,19 @@ import (
 const videosUserID = 72938233 // dweia131
 
 func checkAllVideosDataIsWellDefined(t *testing.T, data []VideosEntry) {
+	hasTitles := false
+
 	for _, v := range data {
 		require.NotEqual(t, "", v.ID)
 		require.NotEqual(t, 0, v.UserID)
-		require.NotEqual(t, "", v.Title)
 		require.NotEqual(t, time.Unix(0, 0), v.CreatedAt)
 		require.NotEqual(t, time.Unix(0, 0), v.PublishedAt)
 		require.NotEqual(t, "", v.Duration)
+
+		hasTitles = hasTitles || v.Title != ""
 	}
+
+	require.NotEqual(t, false, hasTitles)
 }
 func checkAllVideosDataAdditional(t *testing.T, data []VideosEntry) {
 	descCount := 0
