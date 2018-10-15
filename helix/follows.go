@@ -10,6 +10,7 @@ import (
 type FollowsResponse struct {
 	Data       []FollowsEntry `json:"data"`
 	Pagination Pagination     `json:"pagination,omitempty"`
+	Total      int            `json:"total"`
 }
 
 type FollowsEntry struct {
